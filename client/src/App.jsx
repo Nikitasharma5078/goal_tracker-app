@@ -9,10 +9,7 @@ import Auth from './components/Auth'
 
 function App() {
   const [activePage, setActivePage] = useState('dashboard')
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('user')
-    return saved ? JSON.parse(saved) : null
-  })
+  const [user, setUser] = useState(null)
 
   const renderPage = () => {
     switch (activePage) {
