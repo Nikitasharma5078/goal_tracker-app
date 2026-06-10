@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Target, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
+import axios from 'axios'
+
+const API = import.meta.env.VITE_API_URL
 
 export default function Auth({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true)
@@ -17,13 +20,29 @@ export default function Auth({ onLogin }) {
       toast.error('Please enter your name!')
       return
     }
+
     setLoading(true)
-    // Simulate login for now
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register'
+      const payload = isLogin
+        ? { email: form.email, password: form.password }
+        : { name: form.name, email: form.email, password: form.password }
+
+      const res = await axios.post(`${API}${endpoint}`, payload)
+      const { token, user } = res.data
+
+      // Save token to localStorage
+      localStorage.setItem('token', token)
+      localStorage.setItem('user', JSON.stringify(user))
+
       toast.success(isLogin ? 'Welcome back!' : 'Account created!')
-      onLogin({ name: form.name || form.email.split('@')[0], email: form.email })
-    }, 1000)
+      onLogin(user)
+
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong!')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -46,7 +65,6 @@ export default function Auth({ onLogin }) {
           </p>
 
           <div className="flex flex-col gap-4">
-            {/* Name field - signup only */}
             {!isLogin && (
               <div>
                 <label className="text-gray-400 text-sm mb-1 block">Full Name</label>
@@ -60,7 +78,6 @@ export default function Auth({ onLogin }) {
               </div>
             )}
 
-            {/* Email */}
             <div>
               <label className="text-gray-400 text-sm mb-1 block">Email</label>
               <input
@@ -72,7 +89,6 @@ export default function Auth({ onLogin }) {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="text-gray-400 text-sm mb-1 block">Password</label>
               <div className="relative">
@@ -92,7 +108,6 @@ export default function Auth({ onLogin }) {
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               onClick={handle}
               disabled={loading}
@@ -102,7 +117,6 @@ export default function Auth({ onLogin }) {
             </button>
           </div>
 
-          {/* Toggle */}
           <p className="text-center text-gray-400 text-sm mt-6">
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
             <button
@@ -114,7 +128,6 @@ export default function Auth({ onLogin }) {
           </p>
         </div>
 
-        {/* Quote */}
         <p className="text-center text-gray-600 text-sm mt-6">
           "A goal without a plan is just a wish."
         </p>

@@ -9,7 +9,10 @@ import Auth from './components/Auth'
 
 function App() {
   const [activePage, setActivePage] = useState('dashboard')
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(() => {
+  const saved = localStorage.getItem('user')
+  return saved ? JSON.parse(saved) : null
+})
 
   const renderPage = () => {
     switch (activePage) {
@@ -33,7 +36,11 @@ function App() {
   return (
     <div className="flex min-h-screen bg-gray-950 text-white">
       <Toaster position="top-right" />
-      <Sidebar activePage={activePage} setActivePage={setActivePage} user={user} onLogout={() => setUser(null)} />
+      <Sidebar activePage={activePage} setActivePage={setActivePage} user={user} <Sidebar activePage={activePage} setActivePage={setActivePage} user={user} onLogout={() => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  setUser(null)
+}} />
       <main className="flex-1 p-6 overflow-y-auto">
         {renderPage()}
       </main>
